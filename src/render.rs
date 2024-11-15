@@ -86,7 +86,7 @@ pub fn render_cell(canvas: &mut Canvas<Window>, cell: Cell) {
     canvas.set_draw_color(Color::GRAY);
     let cell_start_x: i32 = cell.top_left.x + CELL_PADDING;
     let cell_start_y: i32 = cell.top_left.y + CELL_PADDING;
-    let cell_dim: u32 = (CELL_SIZE - 2 * CELL_PADDING) as u32;
+    let cell_dim: u32 = (CELL_SIZE - 2 * CELL_PADDING + 1) as u32;
     let cell_rect = Rect::new(cell_start_x, cell_start_y, cell_dim, cell_dim);
     canvas.fill_rect(cell_rect).unwrap();
 }
