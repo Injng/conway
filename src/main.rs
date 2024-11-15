@@ -61,7 +61,8 @@ fn render_grid(canvas: &mut Canvas<Window>) {
     // calculate number of cells from cell size and available screen size
     // first, ensure screen size is large enough
     if screen_size.0 < MINIMAL_SCREEN_SIZE || screen_size.1 < MINIMAL_SCREEN_SIZE {
-        panic!("Screen is not large enough to render cells");
+        eprintln!("WARNING: Screen not large enough to render grid");
+        return;
     }
     // then, calculate available space for cells
     let available_width: i32 = screen_size.0 as i32 - 2 * BUFFER_SIZE;
