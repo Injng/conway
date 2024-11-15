@@ -4,7 +4,7 @@ use sdl2::render::Canvas;
 use sdl2::video::Window;
 
 const CELL_SIZE: i32 = 30;
-const CELL_PADDING: i32 = 5;
+const CELL_PADDING: i32 = 2;
 const BUFFER_SIZE: i32 = 60;
 const MINIMAL_SCREEN_SIZE: u32 = 2 * BUFFER_SIZE as u32 + CELL_SIZE as u32;
 
