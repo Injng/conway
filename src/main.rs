@@ -58,8 +58,8 @@ fn main() {
             cells_start = (cells_start_x, cells_start_y);
 
             // render all cells in the backend that correspond to the screen
-            for i in 0..grid_dim.1 {
-                for j in 0..grid_dim.0 {
+            for i in 0..grid_dim.0 {
+                for j in 0..grid_dim.1 {
                     if cells[cells_start_y + i as usize][cells_start_x + j as usize] {
                         let grid_vec = Vector2::new(j, i);
                         let new_cell = Cell::from_grid(grid_vec);
