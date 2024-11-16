@@ -1,5 +1,7 @@
+pub mod life;
 pub mod render;
 
+use life::simulate;
 use render::{Cell, Vector2, render_cell, render_grid};
 
 use sdl2::event::Event;
@@ -25,12 +27,15 @@ fn main() {
     let simulated_cols = 60;
     let mut cells: Vec<Vec<bool>> = vec![vec![false; simulated_cols]; simulated_rows];
 
+    // if we want to start simulating
+    let mut is_simulating = false;
+
     // render loop
     'running: loop {
         // determine if a grid can be rendered
         let mut is_rendered = true;
         
-        // render ui
+        // render grid
         canvas.set_draw_color(Color::WHITE);
         canvas.clear();
         let mut grid_dim: (i32, i32) = (0, 0);  // (rows, cols)
@@ -38,7 +43,13 @@ fn main() {
             Ok(res) => grid_dim = res,
             Err(_) => is_rendered = false,
         }
+        
+        // simulate Life
+        if is_simulating {
+            cells = simulate(cells);
+        }
 
+        // render cells
         let mut cells_start: (usize, usize) = (0, 0);
         if is_rendered == true {
             // figure out where the grid on the screen maps to the grid on the backend
@@ -75,6 +86,11 @@ fn main() {
                             let grid_y = cells_start.1 + grid_vec.y as usize;
                             let grid_x = cells_start.0 + grid_vec.x as usize;
                             cells[grid_y][grid_x] = !cells[grid_y][grid_x];
+                        }
+
+                        // otherwise, click outside indicates change of simulation state
+                        else {
+                            is_simulating = !is_simulating;
                         }
                     }
                 },
