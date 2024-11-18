@@ -1,8 +1,11 @@
+pub mod controls;
+pub mod draw;
 pub mod life;
-pub mod render;
+pub mod ui;
 
+use controls::{render_pause, render_play};
+use ui::{Cell, render_cell, render_grid, Vector2};
 use life::simulate;
-use render::{Cell, Vector2, render_cell, render_grid};
 
 use sdl2::event::Event;
 use sdl2::pixels::Color;
@@ -68,7 +71,7 @@ fn main() {
                 }
             }
         }
-        
+
         // handle events
         for event in event_pump.poll_iter() {
             match event {
