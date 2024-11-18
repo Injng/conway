@@ -6,6 +6,16 @@ use sdl2::rect::Rect;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
+// control dimension constants
+const HEIGHT: i32 = BUFFER_SIZE / 2;
+const PLAY_BUTTON_WIDTH: i32 = ((HEIGHT / 2) as f32 * 1.7321) as i32;
+const PAUSE_BUTTON_WIDTH: i32 = HEIGHT / 4;
+const PAUSE_BUTTON_DIST: i32 = HEIGHT / 3;
+
+// padding on top and on the bottom for the controls
+const PADDING_TOP: i32 = (BUFFER_SIZE - HEIGHT) / 2;
+const PADDING_BOTTOM: i32 = BUFFER_SIZE - PADDING_TOP - HEIGHT;
+
 /// Render a play button in the bottom buffer
 pub fn render_play(canvas: &mut Canvas<Window>) {
     // get screen size and set draw color
@@ -14,18 +24,13 @@ pub fn render_play(canvas: &mut Canvas<Window>) {
     let screen_height = screen_size.1 as i32;
     canvas.set_draw_color(Color::BLACK);
 
-    // dimensions for the play button triangle, using equilateral triangle lengths
-    let height: i32 = BUFFER_SIZE / 2;
-    let width: i32 = ((height as f32 / 2.0) * (3 as f32).sqrt()) as i32;
-
-    // padding on top and on the bottom for the play button triangle
-    let p_top: i32 = (BUFFER_SIZE - height) / 2;
-    let p_bottom: i32 = BUFFER_SIZE - p_top - height;
-
     // points for the play button triangle
-    let a = Vector2::new((screen_width - width) / 2, screen_height - BUFFER_SIZE + p_top);
-    let b = Vector2::new((screen_width - width) / 2, screen_height - p_bottom);
-    let c = Vector2::new((screen_width + width) / 2, screen_height - p_bottom - height / 2);
+    let a = Vector2::new((screen_width - PLAY_BUTTON_WIDTH) / 2, 
+        screen_height - BUFFER_SIZE + PADDING_TOP);
+    let b = Vector2::new((screen_width - PLAY_BUTTON_WIDTH) / 2, 
+        screen_height - PADDING_BOTTOM);
+    let c = Vector2::new((screen_width + PLAY_BUTTON_WIDTH) / 2, 
+        screen_height - PADDING_BOTTOM - HEIGHT / 2);
 
     // render the triangle
     fill_triangle(canvas, a, b, c);
@@ -39,24 +44,15 @@ pub fn render_pause(canvas: &mut Canvas<Window>) {
     let screen_height = screen_size.1 as i32;
     canvas.set_draw_color(Color::BLACK);
 
-    // dimensions for the pause button, including distance between the two rectangles
-    let height: i32 = BUFFER_SIZE / 2;
-    let width: i32 = height / 4;
-    let distance: i32 = height / 3;
-
-    // padding on top and on the bottom for the pause button
-    let p_top: i32 = (BUFFER_SIZE - height) / 2;
-    let p_bottom: i32 = BUFFER_SIZE - p_top - height;
-
     // create the rectangles
-    let left_rect = Rect::new((screen_width - distance) / 2 - width,
-        screen_height - p_bottom - height,
-        width as u32,
-        height as u32);
-    let right_rect = Rect::new((screen_width + distance) / 2,
-        screen_height - p_bottom - height,
-        width as u32,
-        height as u32);
+    let left_rect = Rect::new((screen_width - PAUSE_BUTTON_DIST) / 2 - PAUSE_BUTTON_WIDTH,
+        screen_height - PADDING_BOTTOM - HEIGHT,
+        PAUSE_BUTTON_WIDTH as u32,
+        HEIGHT as u32);
+    let right_rect = Rect::new((screen_width + PAUSE_BUTTON_DIST) / 2,
+        screen_height - PADDING_BOTTOM - HEIGHT,
+        PAUSE_BUTTON_WIDTH as u32,
+        HEIGHT as u32);
 
     // render the rectangles
     canvas.fill_rect(left_rect).unwrap();
