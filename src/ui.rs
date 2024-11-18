@@ -5,10 +5,11 @@ use sdl2::video::Window;
 
 const CELL_SIZE: i32 = 30;
 const CELL_PADDING: i32 = 2;
-const BUFFER_SIZE: i32 = 60;
+pub const BUFFER_SIZE: i32 = 60;
 const MINIMAL_SCREEN_SIZE: u32 = 2 * BUFFER_SIZE as u32 + CELL_SIZE as u32;
 
 /// Struct to convert between grid coordinates and screen coordinates
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
 pub struct Vector2 {
     pub x: i32,
     pub y: i32,
@@ -134,3 +135,4 @@ pub fn render_grid(canvas: &mut Canvas<Window>) -> Result<(i32, i32), String> {
 
     Ok((rows, cols))
 }
+

@@ -1,8 +1,11 @@
+pub mod controls;
+pub mod draw;
 pub mod life;
-pub mod render;
+pub mod ui;
 
+use controls::{in_pause, in_play, render_pause, render_play};
+use ui::{Cell, render_cell, render_grid, Vector2};
 use life::simulate;
-use render::{Cell, Vector2, render_cell, render_grid};
 
 use sdl2::event::Event;
 use sdl2::pixels::Color;
@@ -68,7 +71,14 @@ fn main() {
                 }
             }
         }
-        
+
+        // render pause and play buttons according to simulation state
+        if is_simulating {
+            render_pause(&mut canvas);
+        } else {
+            render_play(&mut canvas);
+        }
+
         // handle events
         for event in event_pump.poll_iter() {
             match event {
@@ -88,9 +98,11 @@ fn main() {
                             cells[grid_y][grid_x] = !cells[grid_y][grid_x];
                         }
 
-                        // otherwise, click outside indicates change of simulation state
-                        else {
-                            is_simulating = !is_simulating;
+                        // otherwise, handle control clicks
+                        else if is_simulating {
+                            if in_pause(&canvas, x, y) { is_simulating = false; }
+                        } else if !is_simulating {
+                            if in_play(&canvas, x, y) { is_simulating = true; }
                         }
                     }
                 },
