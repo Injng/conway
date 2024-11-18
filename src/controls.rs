@@ -16,6 +16,11 @@ const PAUSE_BUTTON_DIST: i32 = HEIGHT / 3;
 const PADDING_TOP: i32 = (BUFFER_SIZE - HEIGHT) / 2;
 const PADDING_BOTTOM: i32 = BUFFER_SIZE - PADDING_TOP - HEIGHT;
 
+// location of slider
+const SLIDER_X: i32 = 60;
+const SLIDER_WIDTH: i32 = 120;
+const SLIDER_PADDING: i32 = 2;
+
 /// Render a play button in the bottom buffer
 pub fn render_play(canvas: &mut Canvas<Window>) {
     // get screen size and set draw color
@@ -57,6 +62,31 @@ pub fn render_pause(canvas: &mut Canvas<Window>) {
     // render the rectangles
     canvas.fill_rect(left_rect).unwrap();
     canvas.fill_rect(right_rect).unwrap();
+}
+
+/// Render a slider for controlling the speed of the simulation
+/// The length of the inner slider is controlled by a number from 0 to 1
+pub fn render_slider(canvas: &mut Canvas<Window>, slider_len: f32) {
+    // get screen size and set draw color
+    let screen_size: (u32, u32) = canvas.output_size().unwrap();
+    let screen_width = screen_size.0 as i32;
+    let screen_height = screen_size.1 as i32;
+    canvas.set_draw_color(Color::BLACK);
+
+    // create the outer rectangle
+    let outer_rect = Rect::new(SLIDER_X,
+        screen_height - PADDING_BOTTOM - HEIGHT,
+        SLIDER_WIDTH as u32,
+        HEIGHT as u32);
+    let inner_rect = Rect::new(SLIDER_X + SLIDER_PADDING,
+        screen_height - PADDING_BOTTOM - HEIGHT + SLIDER_PADDING,
+        ((SLIDER_WIDTH - 2 * SLIDER_PADDING) as f32 * slider_len) as u32,
+        (HEIGHT - 2 * SLIDER_PADDING) as u32);
+    
+    // render the rectangles
+    canvas.draw_rect(outer_rect).unwrap();
+    canvas.set_draw_color(Color::RGB(192, 192, 192));
+    canvas.fill_rect(inner_rect).unwrap();
 }
 
 /// Given x and y coordinates, check to see if it is within the play button
