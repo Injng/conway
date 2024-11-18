@@ -4,7 +4,7 @@ use sdl2::render::Canvas;
 use sdl2::video::Window;
 
 /// Given two points that form a line, and a y-coordinate, interpolate the x-coordinate 
-fn interpolate(a: Vector2, b: Vector2, y: i32) -> i32 {
+pub fn interpolate(a: Vector2, b: Vector2, y: i32) -> i32 {
     let m = (b.y - a.y) as f32 / (b.x - a.x) as f32;
     ((y - a.y) as f32 / m) as i32 + a.x
 } 
