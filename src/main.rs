@@ -16,6 +16,10 @@ use sdl2::render::Canvas;
 use sdl2::video::Window;
 use sdl2::{EventPump, Sdl, VideoSubsystem};
 
+const MIN_SPEED: u64 = 500;
+const MAX_SPEED: u64 = 1;
+const DEFAULT_SPEED: u64 = 100;
+
 fn main() {
     // initialize SDL contexts and windows
     let sdl_context: Sdl = sdl2::init().unwrap();
@@ -40,7 +44,7 @@ fn main() {
 
     // keep track of time between loops to update simulation
     let mut last_updated = Instant::now();
-    let interval = Duration::from_millis(100);
+    let mut interval = Duration::from_millis(DEFAULT_SPEED);
 
     // render loop
     'running: loop {
@@ -95,10 +99,13 @@ fn main() {
         // render slider controls for simulation speed
         render_slider(&mut canvas, slider_length);
 
-        // if slider is in moving state, update slider length
+        // if slider is in moving state, update slider length and set speed
         if is_slider_moving {
             let mouse_state: MouseState = MouseState::new(&event_pump);
             slider_length = calc_slider(mouse_state.x());
+            let new_interval =
+                ((MIN_SPEED - MAX_SPEED) as f32 * slider_length) as u64;
+            interval = Duration::from_millis(MIN_SPEED - new_interval);
         }
 
         // handle events
@@ -112,6 +119,9 @@ fn main() {
                     if is_rendered && in_slider(&canvas, x, y) {
                         is_slider_moving = true;
                         slider_length = calc_slider(x as i32);
+                        let new_interval =
+                            ((MIN_SPEED - MAX_SPEED) as f32 * slider_length) as u64;
+                        interval = Duration::from_millis(MIN_SPEED - new_interval);
                     }
                 },
                 Event::MouseButtonUp { x, y, .. } => {
