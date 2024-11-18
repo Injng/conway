@@ -69,11 +69,10 @@ pub fn render_pause(canvas: &mut Canvas<Window>) {
 pub fn render_slider(canvas: &mut Canvas<Window>, slider_len: f32) {
     // get screen size and set draw color
     let screen_size: (u32, u32) = canvas.output_size().unwrap();
-    let screen_width = screen_size.0 as i32;
     let screen_height = screen_size.1 as i32;
     canvas.set_draw_color(Color::BLACK);
 
-    // create the outer rectangle
+    // create the rectangles
     let outer_rect = Rect::new(SLIDER_X,
         screen_height - PADDING_BOTTOM - HEIGHT,
         SLIDER_WIDTH as u32,
@@ -175,5 +174,36 @@ pub fn in_pause(canvas: &Canvas<Window>, x: i32, y: i32) -> bool {
         HEIGHT as u32);
 
     pause_rect.contains_point(click)
+}
+
+/// Given x and y coordinates, check to see if it is within the slider
+pub fn in_slider(canvas: &Canvas<Window>, x: i32, y: i32) -> bool {
+    // get screen size and click point
+    let screen_size: (u32, u32) = canvas.output_size().unwrap();
+    let screen_height = screen_size.1 as i32;
+    let click = Point::new(x, y);
+
+    // create the pause bounding rectangle
+    let outer_rect = Rect::new(SLIDER_X,
+        screen_height - PADDING_BOTTOM - HEIGHT,
+        SLIDER_WIDTH as u32,
+        HEIGHT as u32);
+
+    outer_rect.contains_point(click)
+}
+
+/// Given x coordinates, calculate how long the slider should be
+pub fn calc_slider(x: i32) -> f32 {
+    // calculate bounds
+    let left_bound: i32 = SLIDER_X;
+    let right_bound: i32 = SLIDER_X + SLIDER_WIDTH;
+
+    if x <= left_bound {
+        return 0.0;
+    } else if x >= right_bound {
+        return 1.0;
+    } else {
+        return (x - SLIDER_X) as f32 / SLIDER_WIDTH as f32;
+    }
 }
 

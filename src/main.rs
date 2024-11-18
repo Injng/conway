@@ -5,7 +5,8 @@ pub mod ui;
 
 use std::time::{Duration, Instant};
 
-use controls::{in_pause, in_play, render_pause, render_play};
+use controls::{calc_slider, in_pause, in_play, in_slider, render_pause, render_play, render_slider};
+use sdl2::mouse::MouseState;
 use ui::{Cell, render_cell, render_grid, Vector2};
 use life::simulate;
 
@@ -32,8 +33,10 @@ fn main() {
     let simulated_cols = 60;
     let mut cells: Vec<Vec<bool>> = vec![vec![false; simulated_cols]; simulated_rows];
 
-    // if we want to start simulating
+    // state variables
     let mut is_simulating = false;
+    let mut is_slider_moving = false;
+    let mut slider_length: f32 = 1.0;
 
     // keep track of time between loops to update simulation
     let mut last_updated = Instant::now();
@@ -89,14 +92,30 @@ fn main() {
             render_play(&mut canvas);
         }
 
+        // render slider controls for simulation speed
+        render_slider(&mut canvas, slider_length);
+
+        // if slider is in moving state, update slider length
+        if is_slider_moving {
+            let mouse_state: MouseState = MouseState::new(&event_pump);
+            slider_length = calc_slider(mouse_state.x());
+        }
+
         // handle events
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit { .. } => {
                     break 'running
                 },
+                Event::MouseButtonDown { x, y, .. } => {
+                    // if initial click is in slider, set slider moving variable to true
+                    if is_rendered && in_slider(&canvas, x, y) {
+                        is_slider_moving = true;
+                        slider_length = calc_slider(x as i32);
+                    }
+                },
                 Event::MouseButtonUp { x, y, .. } => {
-                    if is_rendered == true {
+                    if is_rendered {
                         // get click and convert to grid coordinates
                         let click_vec = Vector2::new(x, y);
                         let grid_vec = click_vec.to_grid(grid_dim.0, grid_dim.1);
@@ -108,12 +127,15 @@ fn main() {
                             cells[grid_y][grid_x] = !cells[grid_y][grid_x];
                         }
 
-                        // otherwise, handle control clicks
+                        // check play button clicks
                         else if is_simulating {
                             if in_pause(&canvas, x, y) { is_simulating = false; }
                         } else if !is_simulating {
                             if in_play(&canvas, x, y) { is_simulating = true; }
                         }
+
+                        // if slider was in moving state, get it out of moving state
+                        if is_slider_moving { is_slider_moving = false; }
                     }
                 },
                 _ => {}
