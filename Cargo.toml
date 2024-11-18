@@ -1,6 +1,10 @@
 [package]
 name = "conway"
 version = "0.1.0"
+license = "MIT"
+repository = "https://github.com/Injng/conway/"
+description = "Game of Life in Rust and SDL2"
+readme = "README.md"
 edition = "2021"
 
 [dependencies]
