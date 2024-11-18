@@ -3,6 +3,8 @@ pub mod draw;
 pub mod life;
 pub mod ui;
 
+use std::time::{Duration, Instant};
+
 use controls::{in_pause, in_play, render_pause, render_play};
 use ui::{Cell, render_cell, render_grid, Vector2};
 use life::simulate;
@@ -33,6 +35,10 @@ fn main() {
     // if we want to start simulating
     let mut is_simulating = false;
 
+    // keep track of time between loops to update simulation
+    let mut last_updated = Instant::now();
+    let interval = Duration::from_millis(100);
+
     // render loop
     'running: loop {
         // determine if a grid can be rendered
@@ -49,7 +55,11 @@ fn main() {
         
         // simulate Life
         if is_simulating {
-            cells = simulate(cells);
+            let curr_time = Instant::now();
+            if curr_time.duration_since(last_updated) > interval {
+                cells = simulate(cells);
+                last_updated = curr_time;
+            }
         }
 
         // render cells
