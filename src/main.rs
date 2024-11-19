@@ -24,7 +24,7 @@ use sdl2::{EventPump, Sdl, VideoSubsystem};
 // speed for the simulation
 const MIN_SPEED: u64 = 500;
 const MAX_SPEED: u64 = 1;
-const DEFAULT_SPEED: u64 = 100;
+const DEFAULT_SPEED: u64 = 1;
 
 // font byte array
 const FONT_BYTES: &[u8] = include_bytes!("../assets/fonts/FiraSans-Regular.ttf");
