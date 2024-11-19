@@ -41,5 +41,11 @@ impl<'creator, 'font> TextCache<'creator, 'font> {
             return &self.textures[text];
         }
     }
+
+    /// Get dimensions of string rendered with Font
+    pub fn get_dimensions(&self, text: &str) -> (i32, i32) {
+        let dimensions = self.font.size_of(text).unwrap();
+        (dimensions.0 as i32, dimensions.1 as i32)
+    }
 }
 

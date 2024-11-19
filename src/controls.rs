@@ -1,9 +1,10 @@
 use crate::draw::{fill_triangle, interpolate};
+use crate::text::TextCache;
 use crate::ui::{BUFFER_SIZE, Vector2};
 
 use sdl2::pixels::Color;
 use sdl2::rect::{Point, Rect};
-use sdl2::render::Canvas;
+use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
 
 // control dimension constants
@@ -66,7 +67,12 @@ pub fn render_pause(canvas: &mut Canvas<Window>) {
 
 /// Render a slider for controlling the speed of the simulation
 /// The length of the inner slider is controlled by a number from 0 to 1
-pub fn render_slider(canvas: &mut Canvas<Window>, slider_len: f32) {
+pub fn render_slider(
+    canvas: &mut Canvas<Window>, 
+    text_cache: &mut TextCache,
+    speed_text: &str,
+    slider_len: f32,
+) {
     // get screen size and set draw color
     let screen_size: (u32, u32) = canvas.output_size().unwrap();
     let screen_height = screen_size.1 as i32;
@@ -86,6 +92,21 @@ pub fn render_slider(canvas: &mut Canvas<Window>, slider_len: f32) {
     canvas.draw_rect(outer_rect).unwrap();
     canvas.set_draw_color(Color::RGB(192, 192, 192));
     canvas.fill_rect(inner_rect).unwrap();
+
+    // render the speed text
+    let dimensions: (i32, i32) = text_cache.get_dimensions(speed_text);
+    let text_texture: &Texture = text_cache.render_text(speed_text);
+    let text_x: i32 =
+        SLIDER_X + ((SLIDER_WIDTH - dimensions.0) as f32 / 2.0) as i32;
+    let text_y: i32 =
+        screen_height - PADDING_BOTTOM - ((HEIGHT + dimensions.1) as f32 / 2.0) as i32;
+    canvas
+        .copy(
+            text_texture,
+            None,
+            Some(Rect::new(text_x, text_y, dimensions.0 as u32, dimensions.1 as u32)),
+        )
+        .unwrap();
 }
 
 /// Given x and y coordinates, check to see if it is within the play button

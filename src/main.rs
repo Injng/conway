@@ -49,7 +49,7 @@ fn main() {
             rwops::RWops::from_bytes(FONT_BYTES).unwrap(),
             16,
         ).unwrap();
-    let text_cache = TextCache::new(&texture_creator, &font);
+    let mut text_cache = TextCache::new(&texture_creator, &font);
 
     // the number of rows and columns to simulate on the backend
     let simulated_rows = 60;
@@ -116,7 +116,8 @@ fn main() {
         }
 
         // render slider controls for simulation speed
-        render_slider(&mut canvas, slider_length);
+        let speed_text: &str = &interval.as_millis().to_string();
+        render_slider(&mut canvas, &mut text_cache, speed_text, slider_length);
 
         // if slider is in moving state, update slider length and set speed
         if is_slider_moving {
