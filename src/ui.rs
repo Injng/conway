@@ -3,6 +3,8 @@ use sdl2::rect::{Point, Rect};
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
+use std::cmp::min;
+
 const CELL_SIZE: i32 = 30;
 const CELL_PADDING: i32 = 2;
 pub const BUFFER_SIZE: i32 = 60;
@@ -108,8 +110,8 @@ pub fn render_grid(canvas: &mut Canvas<Window>) -> Result<(i32, i32), String> {
     // then, calculate available space for cells
     let available_width: i32 = screen_size.0 as i32 - 2 * BUFFER_SIZE;
     let available_height: i32 = screen_size.1 as i32 - 2 * BUFFER_SIZE;
-    let rows: i32 = available_height / CELL_SIZE;
-    let cols: i32 = available_width / CELL_SIZE;
+    let rows: i32 = min(60, available_height / CELL_SIZE);
+    let cols: i32 = min(60, available_width / CELL_SIZE);
 
     // draw the lines for the rows
     for i in 0..=rows {
