@@ -18,3 +18,7 @@ To begin the simulation, click the play button at the bottom of the grid. To pau
 the pause button that will be located once the simulation has started playing. Note also that
 the grid size on screen may change as you resize the window, but the back-end simulation runs
 on a fixed 60x60 grid that wraps around on borders.
+
+You may also adjust the speed of the simulation (or more accurately, the interval between
+updates of the simulation) through the slider on the bottom left. The number indicates the
+approximate number of milliseconds between each update of the grid.
