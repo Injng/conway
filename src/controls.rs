@@ -1,9 +1,10 @@
 use crate::draw::{fill_triangle, interpolate};
+use crate::text::TextCache;
 use crate::ui::{BUFFER_SIZE, Vector2};
 
 use sdl2::pixels::Color;
 use sdl2::rect::{Point, Rect};
-use sdl2::render::Canvas;
+use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
 
 // control dimension constants
@@ -15,6 +16,11 @@ const PAUSE_BUTTON_DIST: i32 = HEIGHT / 3;
 // padding on top and on the bottom for the controls
 const PADDING_TOP: i32 = (BUFFER_SIZE - HEIGHT) / 2;
 const PADDING_BOTTOM: i32 = BUFFER_SIZE - PADDING_TOP - HEIGHT;
+
+// location of slider
+const SLIDER_X: i32 = 60;
+const SLIDER_WIDTH: i32 = 120;
+const SLIDER_PADDING: i32 = 2;
 
 /// Render a play button in the bottom buffer
 pub fn render_play(canvas: &mut Canvas<Window>) {
@@ -57,6 +63,50 @@ pub fn render_pause(canvas: &mut Canvas<Window>) {
     // render the rectangles
     canvas.fill_rect(left_rect).unwrap();
     canvas.fill_rect(right_rect).unwrap();
+}
+
+/// Render a slider for controlling the speed of the simulation
+/// The length of the inner slider is controlled by a number from 0 to 1
+pub fn render_slider(
+    canvas: &mut Canvas<Window>, 
+    text_cache: &mut TextCache,
+    speed_text: &str,
+    slider_len: f32,
+) {
+    // get screen size and set draw color
+    let screen_size: (u32, u32) = canvas.output_size().unwrap();
+    let screen_height = screen_size.1 as i32;
+    canvas.set_draw_color(Color::BLACK);
+
+    // create the rectangles
+    let outer_rect = Rect::new(SLIDER_X,
+        screen_height - PADDING_BOTTOM - HEIGHT,
+        SLIDER_WIDTH as u32,
+        HEIGHT as u32);
+    let inner_rect = Rect::new(SLIDER_X + SLIDER_PADDING,
+        screen_height - PADDING_BOTTOM - HEIGHT + SLIDER_PADDING,
+        ((SLIDER_WIDTH - 2 * SLIDER_PADDING) as f32 * slider_len) as u32,
+        (HEIGHT - 2 * SLIDER_PADDING) as u32);
+    
+    // render the rectangles
+    canvas.draw_rect(outer_rect).unwrap();
+    canvas.set_draw_color(Color::RGB(192, 192, 192));
+    canvas.fill_rect(inner_rect).unwrap();
+
+    // render the speed text
+    let dimensions: (i32, i32) = text_cache.get_dimensions(speed_text);
+    let text_texture: &Texture = text_cache.render_text(speed_text);
+    let text_x: i32 =
+        SLIDER_X + ((SLIDER_WIDTH - dimensions.0) as f32 / 2.0) as i32;
+    let text_y: i32 =
+        screen_height - PADDING_BOTTOM - ((HEIGHT + dimensions.1) as f32 / 2.0) as i32;
+    canvas
+        .copy(
+            text_texture,
+            None,
+            Some(Rect::new(text_x, text_y, dimensions.0 as u32, dimensions.1 as u32)),
+        )
+        .unwrap();
 }
 
 /// Given x and y coordinates, check to see if it is within the play button
@@ -145,5 +195,36 @@ pub fn in_pause(canvas: &Canvas<Window>, x: i32, y: i32) -> bool {
         HEIGHT as u32);
 
     pause_rect.contains_point(click)
+}
+
+/// Given x and y coordinates, check to see if it is within the slider
+pub fn in_slider(canvas: &Canvas<Window>, x: i32, y: i32) -> bool {
+    // get screen size and click point
+    let screen_size: (u32, u32) = canvas.output_size().unwrap();
+    let screen_height = screen_size.1 as i32;
+    let click = Point::new(x, y);
+
+    // create the pause bounding rectangle
+    let outer_rect = Rect::new(SLIDER_X,
+        screen_height - PADDING_BOTTOM - HEIGHT,
+        SLIDER_WIDTH as u32,
+        HEIGHT as u32);
+
+    outer_rect.contains_point(click)
+}
+
+/// Given x coordinates, calculate how long the slider should be
+pub fn calc_slider(x: i32) -> f32 {
+    // calculate bounds
+    let left_bound: i32 = SLIDER_X;
+    let right_bound: i32 = SLIDER_X + SLIDER_WIDTH;
+
+    if x <= left_bound {
+        return 0.0;
+    } else if x >= right_bound {
+        return 1.0;
+    } else {
+        return (x - SLIDER_X) as f32 / SLIDER_WIDTH as f32;
+    }
 }
 
