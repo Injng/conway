@@ -25,7 +25,7 @@ use sdl2::video::Window;
 use sdl2::{EventPump, Sdl, VideoSubsystem};
 
 // speed for the simulation
-const MIN_SPEED: u64 = 500;
+const MIN_SPEED: u64 = 300;
 const MAX_SPEED: u64 = 1;
 const DEFAULT_SPEED: u64 = 1;
 
@@ -36,8 +36,8 @@ const FONT_BYTES: &[u8] = include_bytes!("../assets/fonts/FiraSans-Regular.ttf")
 const UPLOAD_BYTES: &[u8] = include_bytes!("../assets/icons/upload.png");
 
 // size of the simulation
-const SIMULATED_ROWS: usize = 60;
-const SIMULATED_COLS: usize = 60;
+const SIMULATED_ROWS: usize = 120;
+const SIMULATED_COLS: usize = 120;
 const MIN_CELL_SIZE: i32 = 5;
 
 fn main() {
