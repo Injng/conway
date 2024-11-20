@@ -5,6 +5,7 @@ pub mod life;
 pub mod text;
 pub mod ui;
 
+use std::cmp::max;
 use std::time::{Duration, Instant};
 
 use controls::{calc_slider, in_pause, in_play, in_slider, in_upload, in_wrap, render_pause, render_play, render_slider, render_upload, render_wrap};
@@ -24,7 +25,7 @@ use sdl2::video::Window;
 use sdl2::{EventPump, Sdl, VideoSubsystem};
 
 // speed for the simulation
-const MIN_SPEED: u64 = 500;
+const MIN_SPEED: u64 = 300;
 const MAX_SPEED: u64 = 1;
 const DEFAULT_SPEED: u64 = 1;
 
@@ -35,8 +36,9 @@ const FONT_BYTES: &[u8] = include_bytes!("../assets/fonts/FiraSans-Regular.ttf")
 const UPLOAD_BYTES: &[u8] = include_bytes!("../assets/icons/upload.png");
 
 // size of the simulation
-const SIMULATED_ROWS: usize = 60;
-const SIMULATED_COLS: usize = 60;
+const SIMULATED_ROWS: usize = 120;
+const SIMULATED_COLS: usize = 120;
+const MIN_CELL_SIZE: i32 = 5;
 
 fn main() {
     // initialize SDL contexts and windows
@@ -72,6 +74,7 @@ fn main() {
     let mut is_slider_moving = false;
     let mut slider_length: f32 = 1.0;
     let mut is_wrap = false;
+    let mut cell_size = 30;
 
     // keep track of time between loops to update simulation
     let mut last_updated = Instant::now();
@@ -86,7 +89,10 @@ fn main() {
         canvas.set_draw_color(Color::WHITE);
         canvas.clear();
         let mut grid_dim: (i32, i32) = (0, 0);  // (rows, cols)
-        match render_grid(&mut canvas) {
+        match render_grid(&mut canvas,
+                          cell_size,
+                          SIMULATED_ROWS as i32 - 2,
+                          SIMULATED_COLS as i32 - 2) {
             Ok(res) => grid_dim = res,
             Err(_) => is_rendered = false,
         }
@@ -113,8 +119,8 @@ fn main() {
                 for j in 0..grid_dim.1 {
                     if cells[cells_start_y + i as usize][cells_start_x + j as usize] {
                         let grid_vec = Vector2::new(j, i);
-                        let new_cell = Cell::from_grid(grid_vec);
-                        render_cell(&mut canvas, new_cell);
+                        let new_cell = Cell::from_grid(grid_vec, cell_size);
+                        render_cell(&mut canvas, new_cell, cell_size);
                     }
                 }
             }
@@ -152,6 +158,9 @@ fn main() {
                 Event::Quit { .. } => {
                     break 'running
                 },
+                Event::MouseWheel { y, .. } => {
+                    cell_size = max(MIN_CELL_SIZE, cell_size + y);
+                },
                 Event::MouseButtonDown { x, y, .. } => {
                     // if initial click is in slider, set slider moving variable to true
                     if is_rendered && in_slider(&canvas, x, y) {
@@ -166,7 +175,7 @@ fn main() {
                     if is_rendered {
                         // get click and convert to grid coordinates
                         let click_vec = Vector2::new(x, y);
-                        let grid_vec = click_vec.to_grid(grid_dim.0, grid_dim.1);
+                        let grid_vec = click_vec.to_grid(grid_dim.0, grid_dim.1, cell_size);
 
                         // ensure click is within grid and update backend grid
                         if grid_vec.x >= 0 && grid_vec.y >= 0 {
