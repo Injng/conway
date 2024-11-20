@@ -7,7 +7,7 @@ pub mod ui;
 
 use std::time::{Duration, Instant};
 
-use controls::{calc_slider, in_pause, in_play, in_slider, in_upload, render_pause, render_play, render_slider, render_upload};
+use controls::{calc_slider, in_pause, in_play, in_slider, in_upload, in_wrap, render_pause, render_play, render_slider, render_upload, render_wrap};
 use file::upload;
 use sdl2::image::LoadTexture;
 use text::TextCache;
@@ -71,6 +71,7 @@ fn main() {
     let mut is_simulating = false;
     let mut is_slider_moving = false;
     let mut slider_length: f32 = 1.0;
+    let mut is_wrap = false;
 
     // keep track of time between loops to update simulation
     let mut last_updated = Instant::now();
@@ -94,7 +95,7 @@ fn main() {
         if is_simulating {
             let curr_time = Instant::now();
             if curr_time.duration_since(last_updated) > interval {
-                cells = simulate(cells, false);
+                cells = simulate(cells, is_wrap);
                 last_updated = curr_time;
             }
         }
@@ -132,6 +133,9 @@ fn main() {
 
         // render upload icon
         render_upload(&mut canvas, &upload_texture);
+
+        // render wrap button
+        render_wrap(&mut canvas, &mut text_cache, is_wrap);
 
         // if slider is in moving state, update slider length and set speed
         if is_slider_moving {
@@ -180,6 +184,11 @@ fn main() {
                                     cells
                                 },
                             };
+                        }
+
+                        // check wrap button clicks
+                        else if in_wrap(&canvas, &text_cache, x, y, is_wrap) {
+                            is_wrap = !is_wrap;
                         }
 
                         // check play button clicks

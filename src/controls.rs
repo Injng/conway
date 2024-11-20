@@ -261,7 +261,7 @@ pub fn in_upload(x: i32, y: i32) -> bool {
 /// Given x, y coordinates and the wrap state, check to see if it is within the wrap button
 pub fn in_wrap(
     canvas: &Canvas<Window>,
-    text_cache: &mut TextCache,
+    text_cache: &TextCache,
     x: i32,
     y: i32,
     is_wrap: bool
