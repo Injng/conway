@@ -22,6 +22,10 @@ const SLIDER_X: i32 = 60;
 const SLIDER_WIDTH: i32 = 120;
 const SLIDER_PADDING: i32 = 2;
 
+// location of wrap button
+const WRAP_X_RIGHT: i32 = 60;  // x-value for top-right, calculated from the right-end
+const WRAP_TEXT_PADDING: i32 = 10;
+
 // icon size and locations
 const ICON_SIZE: i32 = 20;
 const UPLOAD_X: i32 = 60;
@@ -79,6 +83,37 @@ pub fn render_pause(canvas: &mut Canvas<Window>) {
     // render the rectangles
     canvas.fill_rect(left_rect).unwrap();
     canvas.fill_rect(right_rect).unwrap();
+}
+
+/// Render a button that shows whether it is using wrap-around grids
+pub fn render_wrap(canvas: &mut Canvas<Window>, text_cache: &mut TextCache, is_wrap: bool) {
+    // get screen size and set draw color
+    let screen_size: (u32, u32) = canvas.output_size().unwrap();
+    let screen_width = screen_size.0 as i32;
+    let screen_height = screen_size.1 as i32;
+    canvas.set_draw_color(Color::BLACK);
+    let mut button_text = "VOID";
+    if is_wrap {
+        button_text = "WRAP";
+    }
+    
+    // get the text texture
+    let dimensions: (i32, i32) = text_cache.get_dimensions(button_text);
+    let text_texture: &Texture = text_cache.render_text(button_text);
+    let text_x: i32 = screen_width - WRAP_X_RIGHT - dimensions.0 - WRAP_TEXT_PADDING;
+    let text_y: i32 = screen_height - PADDING_BOTTOM - (HEIGHT + dimensions.1) / 2;
+    
+    // create the rectangles
+    let outer_rect = Rect::new(
+        screen_width - WRAP_X_RIGHT - dimensions.0 - WRAP_TEXT_PADDING * 2,
+        screen_height - PADDING_BOTTOM - HEIGHT,
+        (dimensions.0 + WRAP_TEXT_PADDING * 2) as u32,
+        HEIGHT as u32);
+    let text_rect = Rect::new(text_x, text_y, dimensions.0 as u32, dimensions.1 as u32);
+
+    // render the rectangles
+    canvas.draw_rect(outer_rect).unwrap();
+    canvas.copy(text_texture, None, text_rect).unwrap();
 }
 
 /// Render a slider for controlling the speed of the simulation
@@ -202,7 +237,6 @@ pub fn in_pause(canvas: &Canvas<Window>, x: i32, y: i32) -> bool {
     let screen_size: (u32, u32) = canvas.output_size().unwrap();
     let screen_width = screen_size.0 as i32;
     let screen_height = screen_size.1 as i32;
-    let click = Point::new(x, y);
 
     // create the pause bounding rectangle
     let pause_rect = Rect::new((screen_width - PAUSE_BUTTON_DIST) / 2 - PAUSE_BUTTON_WIDTH,
@@ -210,7 +244,7 @@ pub fn in_pause(canvas: &Canvas<Window>, x: i32, y: i32) -> bool {
         (2 * PAUSE_BUTTON_WIDTH + PAUSE_BUTTON_DIST) as u32,
         HEIGHT as u32);
 
-    pause_rect.contains_point(click)
+    pause_rect.contains_point(Point::new(x, y))
 }
 
 /// Given x and y coordinates, check to see if it is within the upload icon
@@ -224,12 +258,41 @@ pub fn in_upload(x: i32, y: i32) -> bool {
     upload_rect.contains_point(Point::new(x, y))
 }
 
+/// Given x, y coordinates and the wrap state, check to see if it is within the wrap button
+pub fn in_wrap(
+    canvas: &Canvas<Window>,
+    text_cache: &TextCache,
+    x: i32,
+    y: i32,
+    is_wrap: bool
+) -> bool {
+    // get screen size and set draw color
+    let screen_size: (u32, u32) = canvas.output_size().unwrap();
+    let screen_width = screen_size.0 as i32;
+    let screen_height = screen_size.1 as i32;
+    let mut button_text = "VOID";
+    if is_wrap {
+        button_text = "WRAP";
+    }
+    
+    // get the text texture dimensions
+    let dimensions: (i32, i32) = text_cache.get_dimensions(button_text);
+
+    // get the bounding rectangle
+    let outer_rect = Rect::new(
+        screen_width - WRAP_X_RIGHT - dimensions.0 - WRAP_TEXT_PADDING * 2,
+        screen_height - PADDING_BOTTOM - HEIGHT,
+        (dimensions.0 + WRAP_TEXT_PADDING * 2) as u32,
+        HEIGHT as u32);
+
+    outer_rect.contains_point(Point::new(x, y))
+}
+
 /// Given x and y coordinates, check to see if it is within the slider
 pub fn in_slider(canvas: &Canvas<Window>, x: i32, y: i32) -> bool {
     // get screen size and click point
     let screen_size: (u32, u32) = canvas.output_size().unwrap();
     let screen_height = screen_size.1 as i32;
-    let click = Point::new(x, y);
 
     // create the pause bounding rectangle
     let outer_rect = Rect::new(SLIDER_X,
@@ -237,7 +300,7 @@ pub fn in_slider(canvas: &Canvas<Window>, x: i32, y: i32) -> bool {
         SLIDER_WIDTH as u32,
         HEIGHT as u32);
 
-    outer_rect.contains_point(click)
+    outer_rect.contains_point(Point::new(x, y))
 }
 
 /// Given x coordinates, calculate how long the slider should be

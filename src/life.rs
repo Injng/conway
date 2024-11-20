@@ -27,7 +27,7 @@ fn apply_rules(cells: &Vec<Vec<bool>>) -> bool {
 }
 
 /// Simulates one generation of the game, returning the updated grid
-pub fn simulate(cells: Vec<Vec<bool>>) -> Vec<Vec<bool>> {
+pub fn simulate(cells: Vec<Vec<bool>>, is_wrap: bool) -> Vec<Vec<bool>> {
     // the new vector of cells to return, representing the next generation
     let rows = cells.len();
     let cols = cells[0].len();
@@ -39,12 +39,26 @@ pub fn simulate(cells: Vec<Vec<bool>>) -> Vec<Vec<bool>> {
             // slice to pass in for rule application
             let mut slice: Vec<Vec<bool>> = vec![vec![false; 3]; 3];
 
-            // utilize wrap-around coordinates and fill the slice
-            for di in 0..3 {
-                for dj in 0..3 {
-                    let row = (i + rows - 1 + di) % rows;
-                    let col = (j + cols - 1 + dj) % cols;
-                    slice[di][dj] = cells[row][col];
+            if is_wrap {
+                // utilize wrap-around coordinates and fill the slice 
+                for di in 0..3 {
+                    for dj in 0..3 {
+                        let row = (i + rows - 1 + di) % rows;
+                        let col = (j + cols - 1 + dj) % cols;
+                        slice[di][dj] = cells[row][col];
+                    }
+                }
+            } else {
+                // make cells disappear after they go past boundary
+                if i == 0 || i == rows - 1 || j == 0 || j == rows - 1 {
+                    ret_cells[i][j] = false;
+                    continue;
+                } else {
+                    for di in 0..3 {
+                        for dj in 0..3 {
+                            slice[di][dj] = cells[i + di - 1][j + dj - 1];
+                        }
+                    }
                 }
             }
 
