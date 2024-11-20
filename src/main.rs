@@ -94,7 +94,7 @@ fn main() {
         if is_simulating {
             let curr_time = Instant::now();
             if curr_time.duration_since(last_updated) > interval {
-                cells = simulate(cells);
+                cells = simulate(cells, false);
                 last_updated = curr_time;
             }
         }
