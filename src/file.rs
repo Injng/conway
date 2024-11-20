@@ -33,7 +33,6 @@ fn parse_plaintext(text: String) -> Result<Vec<Vec<bool>>, String> {
     for mut line in text.split("\n") {
         line = line.trim();
         if !line.starts_with("!") && !line.is_empty() {
-            println!("{}", line);
             if !line.chars().all(|x| x == '.' || x == 'O') {
                 return Err("Only use . or O to mark patterns".to_string());
             }

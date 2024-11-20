@@ -19,6 +19,20 @@ the pause button that will be located once the simulation has started playing. N
 the grid size on screen may change as you resize the window, but the back-end simulation runs
 on a fixed 60x60 grid that wraps around on borders.
 
+### Configuration
+#### Speed
 You may also adjust the speed of the simulation (or more accurately, the interval between
 updates of the simulation) through the slider on the bottom left. The number indicates the
 approximate number of milliseconds between each update of the grid.
+
+#### Simulation Type
+The simulation by default is in the "VOID" type. This means that cells, once they reach the
+boundary of the grid, will "disappear" into a void. We have also implemented a "WRAP" type,
+which wraps the cells back around into the grid. You can toggle between these types using 
+the button that displays either "VOID" or "WRAP" on the lower right corner.
+
+### Movement
+You can zoom in and out of the grid, showing more cells or less cells as you like, by use of
+the mouse wheel or trackpad scroll.
+
+
