@@ -1,5 +1,6 @@
 pub mod controls;
 pub mod draw;
+pub mod file;
 pub mod life;
 pub mod text;
 pub mod ui;
@@ -8,12 +9,13 @@ use std::time::{Duration, Instant};
 
 use controls::{calc_slider, in_pause, in_play, in_slider, render_pause, render_play,
     render_slider};
-use sdl2::mouse::MouseState;
+use file::get_file;
 use text::TextCache;
 use ui::{Cell, render_cell, render_grid, Vector2};
 use life::simulate;
 
 use sdl2::event::Event;
+use sdl2::mouse::MouseState;
 use sdl2::pixels::Color;
 use sdl2::render::Canvas;
 use sdl2::rwops;
@@ -155,10 +157,18 @@ fn main() {
                             let grid_y = cells_start.1 + grid_vec.y as usize;
                             let grid_x = cells_start.0 + grid_vec.x as usize;
                             cells[grid_y][grid_x] = !cells[grid_y][grid_x];
+                        } else {
+                            let contents: String = match get_file() {
+                                Ok(s) => s,
+                                Err(e) => {
+                                    eprintln!("ERROR: {}", e);
+                                    "".to_string()
+                                },
+                            };
                         }
 
                         // check play button clicks
-                        else if is_simulating {
+                        if is_simulating {
                             if in_pause(&canvas, x, y) { is_simulating = false; }
                         } else if !is_simulating {
                             if in_play(&canvas, x, y) { is_simulating = true; }
