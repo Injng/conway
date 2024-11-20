@@ -1,21 +1,23 @@
 pub mod controls;
 pub mod draw;
+pub mod file;
 pub mod life;
 pub mod text;
 pub mod ui;
 
 use std::time::{Duration, Instant};
 
-use controls::{calc_slider, in_pause, in_play, in_slider, render_pause, render_play,
-    render_slider};
-use sdl2::mouse::MouseState;
+use controls::{calc_slider, in_pause, in_play, in_slider, in_upload, render_pause, render_play, render_slider, render_upload};
+use file::upload;
+use sdl2::image::LoadTexture;
 use text::TextCache;
 use ui::{Cell, render_cell, render_grid, Vector2};
 use life::simulate;
 
 use sdl2::event::Event;
+use sdl2::mouse::MouseState;
 use sdl2::pixels::Color;
-use sdl2::render::Canvas;
+use sdl2::render::{Canvas, Texture};
 use sdl2::rwops;
 use sdl2::ttf::{Font, Sdl2TtfContext, self};
 use sdl2::video::Window;
@@ -29,6 +31,13 @@ const DEFAULT_SPEED: u64 = 1;
 // font byte array
 const FONT_BYTES: &[u8] = include_bytes!("../assets/fonts/FiraSans-Regular.ttf");
 
+// icon byte arrays
+const UPLOAD_BYTES: &[u8] = include_bytes!("../assets/icons/upload.png");
+
+// size of the simulation
+const SIMULATED_ROWS: usize = 60;
+const SIMULATED_COLS: usize = 60;
+
 fn main() {
     // initialize SDL contexts and windows
     let sdl_context: Sdl = sdl2::init().unwrap();
@@ -41,7 +50,11 @@ fn main() {
     let mut canvas: Canvas<Window> = window.into_canvas().build().unwrap();
     let mut event_pump: EventPump = sdl_context.event_pump().unwrap();
     let texture_creator = canvas.texture_creator();
+    let _image_context = sdl2::image::init(sdl2::image::InitFlag::PNG).unwrap();
 
+    // initialize icon textures
+    let upload_texture: Texture = texture_creator.load_texture_bytes(UPLOAD_BYTES).unwrap();
+    
     // initialize font and text cache
     let ttf_context: Sdl2TtfContext = ttf::init().expect("Failed to init TTF context");
     let font: Font = ttf_context
@@ -51,10 +64,8 @@ fn main() {
         ).unwrap();
     let mut text_cache = TextCache::new(&texture_creator, &font);
 
-    // the number of rows and columns to simulate on the backend
-    let simulated_rows = 60;
-    let simulated_cols = 60;
-    let mut cells: Vec<Vec<bool>> = vec![vec![false; simulated_cols]; simulated_rows];
+    // initialize backend simulation grid
+    let mut cells: Vec<Vec<bool>> = vec![vec![false; SIMULATED_COLS]; SIMULATED_ROWS];
 
     // state variables
     let mut is_simulating = false;
@@ -92,8 +103,8 @@ fn main() {
         let mut cells_start: (usize, usize) = (0, 0);
         if is_rendered == true {
             // figure out where the grid on the screen maps to the grid on the backend
-            let cells_start_x = (simulated_cols / 2) as usize - (grid_dim.1 / 2) as usize;
-            let cells_start_y = (simulated_rows / 2) as usize - (grid_dim.0 / 2) as usize;
+            let cells_start_x = (SIMULATED_COLS / 2) as usize - (grid_dim.1 / 2) as usize;
+            let cells_start_y = (SIMULATED_ROWS / 2) as usize - (grid_dim.0 / 2) as usize;
             cells_start = (cells_start_x, cells_start_y);
 
             // render all cells in the backend that correspond to the screen
@@ -118,6 +129,9 @@ fn main() {
         // render slider controls for simulation speed
         let speed_text: &str = &interval.as_millis().to_string();
         render_slider(&mut canvas, &mut text_cache, speed_text, slider_length);
+
+        // render upload icon
+        render_upload(&mut canvas, &upload_texture);
 
         // if slider is in moving state, update slider length and set speed
         if is_slider_moving {
@@ -155,6 +169,17 @@ fn main() {
                             let grid_y = cells_start.1 + grid_vec.y as usize;
                             let grid_x = cells_start.0 + grid_vec.x as usize;
                             cells[grid_y][grid_x] = !cells[grid_y][grid_x];
+                        }
+
+                        // check upload icon clicks
+                        else if in_upload(x, y) {
+                            cells = match upload() {
+                                Ok(c) => c,
+                                Err(e) => {
+                                    eprintln!("ERROR: {}", e);
+                                    cells
+                                },
+                            };
                         }
 
                         // check play button clicks
