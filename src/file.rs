@@ -5,7 +5,7 @@ use std::fs;
 use crate::{SIMULATED_COLS, SIMULATED_ROWS};
 
 /// Opens a file dialog for user to select file and get contents of file into String
-pub fn get_file() -> Result<String, String> {
+fn get_file() -> Result<String, String> {
     let files = match FileDialog::new().pick_file() {
         Some(s) => s,
         None => return Err("No file picked".to_string()),
@@ -19,8 +19,15 @@ pub fn get_file() -> Result<String, String> {
     Ok(contents)
 }
 
+/// Manage upload functionality for uploading a file and updating grid
+pub fn upload() -> Result<Vec<Vec<bool>>, String> {
+    let contents: String = get_file()?;
+    let new_cells: Vec<Vec<bool>> = parse_plaintext(contents)?;
+    Ok(new_cells)
+}
+
 /// Parse plaintext format for a Game of Life pattern
-pub fn parse_plaintext(text: String) -> Result<Vec<Vec<bool>>, String> {
+fn parse_plaintext(text: String) -> Result<Vec<Vec<bool>>, String> {
     // read in lines and throw out any invalid lines
     let mut lines: Vec<Vec<char>> = Vec::new();
     for mut line in text.split("\n") {

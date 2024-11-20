@@ -22,6 +22,22 @@ const SLIDER_X: i32 = 60;
 const SLIDER_WIDTH: i32 = 120;
 const SLIDER_PADDING: i32 = 2;
 
+// icon size and locations
+const ICON_SIZE: i32 = 20;
+const UPLOAD_X: i32 = 60;
+
+/// Render a upload icon in the top buffer
+pub fn render_upload(canvas: &mut Canvas<Window>, icon: &Texture) {
+    // create rectangle for icon
+    let upload_rect = Rect::new(UPLOAD_X,
+                                (BUFFER_SIZE - ICON_SIZE) / 2,
+                                ICON_SIZE as u32,
+                                ICON_SIZE as u32);
+
+    // copy texture
+    canvas.copy(icon, None, Some(upload_rect)).unwrap();
+}
+
 /// Render a play button in the bottom buffer
 pub fn render_play(canvas: &mut Canvas<Window>) {
     // get screen size and set draw color
@@ -195,6 +211,17 @@ pub fn in_pause(canvas: &Canvas<Window>, x: i32, y: i32) -> bool {
         HEIGHT as u32);
 
     pause_rect.contains_point(click)
+}
+
+/// Given x and y coordinates, check to see if it is within the upload icon
+pub fn in_upload(x: i32, y: i32) -> bool {
+    // create the bounding rectangle for the upload icon
+    let upload_rect = Rect::new(UPLOAD_X,
+                                (BUFFER_SIZE - ICON_SIZE) / 2,
+                                ICON_SIZE as u32,
+                                ICON_SIZE as u32);
+
+    upload_rect.contains_point(Point::new(x, y))
 }
 
 /// Given x and y coordinates, check to see if it is within the slider
