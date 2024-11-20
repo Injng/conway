@@ -35,9 +35,25 @@ pub fn simulate(cells: Vec<Vec<bool>>, is_wrap: bool) -> Vec<Vec<bool>> {
 
     // iterate through cells and apply the rules
     for i in 0..rows {
+        // if the previous row, this row, and the next row are all false, can skip
+        if i > 0 && i < rows - 1 {
+            let mut all_false = true;
+            for row in i-1..=i+1 {
+                for j in 0..cols {
+                    if cells[row][j] {
+                        all_false = false;
+                        break;
+                    }
+                }
+                if !all_false { break; }
+            }
+            if all_false { continue; }
+        }
+        
         for j in 0..cols {
             // slice to pass in for rule application
             let mut slice: Vec<Vec<bool>> = vec![vec![false; 3]; 3];
+            let mut is_zero = true;
 
             if is_wrap {
                 // utilize wrap-around coordinates and fill the slice 
@@ -46,6 +62,7 @@ pub fn simulate(cells: Vec<Vec<bool>>, is_wrap: bool) -> Vec<Vec<bool>> {
                         let row = (i + rows - 1 + di) % rows;
                         let col = (j + cols - 1 + dj) % cols;
                         slice[di][dj] = cells[row][col];
+                        if cells[row][col] { is_zero = false; }
                     }
                 }
             } else {
@@ -56,10 +73,19 @@ pub fn simulate(cells: Vec<Vec<bool>>, is_wrap: bool) -> Vec<Vec<bool>> {
                 } else {
                     for di in 0..3 {
                         for dj in 0..3 {
-                            slice[di][dj] = cells[i + di - 1][j + dj - 1];
+                            let row = i + di - 1;
+                            let col = j + dj - 1;
+                            slice[di][dj] = cells[row][col];
+                            if cells[row][col] { is_zero = false; }
                         }
                     }
                 }
+            }
+
+            // if it is all zeroes, then no need to apply rules
+            if is_zero {
+                ret_cells[i][j] = false;
+                continue;
             }
 
             // apply the rules
